@@ -99,3 +99,13 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Intellij IDEA
+.idea
+
+# Config file. Never check in passwords!!
+config.py
+
+# Last run information and log files - generated each time the script runs
+lastrun.json
+
