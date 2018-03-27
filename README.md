@@ -54,3 +54,9 @@ Updating all data
 Delete the last run information file (`lastrun.json` by default) and the information
 for every staff member will be downloaded next time the script runs
 
+Unit Tests
+-----------------------
+From the project root, run:
+```
+python3 -m unittest discover
+```

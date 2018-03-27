@@ -37,7 +37,11 @@ def get_staff_data(request_token):
     url = config.STAFF_DATA_URL.format(request_token)
     log.info("Getting: {}".format(url))
     response = requests.get(url)
-    return response.json()
+    return json.loads(clean_downloaded_text(response.text))
+
+
+def clean_downloaded_text(input_data):
+    return input_data.replace("\\u200b", "").replace("\u200b", "").replace(u'\xa0', u' ')
 
 
 def get_staff_image(request_token, staff_id, filetype):
