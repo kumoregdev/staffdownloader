@@ -37,6 +37,8 @@ def get_staff_data(request_token):
     url = config.STAFF_DATA_URL.format(request_token)
     log.info("Getting: {}".format(url))
     response = requests.get(url)
+    with open("staff_data.json", 'w') as output:
+        json.dump(json.loads(clean_downloaded_text(response.text)), output)
     return json.loads(clean_downloaded_text(response.text))
 
 
@@ -160,6 +162,13 @@ def process_persons(input_data):
                     'detailsVersion': input_data['detailsVersion']
                 }))
 
+def create_directory(dir_path):
+    try:
+        os.mkdir(dir_path)
+        log.info("Created {}".format(dir_path))
+    except FileExistsError:
+        log.info("Output directory {} exists".format(dir_path))
+
 
 if __name__ == '__main__':
     logging.basicConfig(filename=config.LOG_FILENAME, level=config.LOG_LEVEL, format='%(asctime)s - %(message)s')
@@ -167,6 +176,9 @@ if __name__ == '__main__':
     ch = logging.StreamHandler()
     log.addHandler(ch)
     log.info("Starting up...")
+
+    create_directory(config.OUTPUT_IMAGE_DIRECTORY)
+    create_directory(config.OUTPUT_JSON_DIRECTORY)
 
     last_run = load_run_info(config.LAST_RUN_FILENAME)
 
