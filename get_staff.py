@@ -5,6 +5,11 @@ import os
 import shutil
 import json
 import datetime
+
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
+from urllib3.exceptions import MaxRetryError
+
 import config
 import logging
 
@@ -47,16 +52,29 @@ def clean_downloaded_text(input_data):
 
 
 def get_staff_image(request_token, staff_id, filetype):
+    session = requests.Session()
+
+    retries = Retry(total=5,
+                    backoff_factor=0.5,
+                    status_forcelist=[500, 502, 503, 504])
+
+    session.mount('http://', HTTPAdapter(max_retries=retries))
+
     url = config.STAFF_IMAGE_URL.format(request_token, staff_id, filetype)
     log.info("Getting: {}".format(url))
     output_file_path = os.path.join(config.OUTPUT_IMAGE_DIRECTORY, str(staff_id) + "." + filetype)
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(output_file_path, 'wb') as f:
-            response.raw.decode_content = True
-            shutil.copyfileobj(response.raw, f)
-    else:
-        log.error("Error {} getting file {}".format(response.status_code, url))
+    try:
+        response = session.get(url, stream=True)
+        if response.status_code == 200:
+            with open(output_file_path, 'wb') as f:
+                response.raw.decode_content = True
+                shutil.copyfileobj(response.raw, f)
+        else:
+            log.error("Error {} getting file {}".format(response.status_code, url))
+    except MaxRetryError:
+        log.error("Error: Max retries exceeded getting file {}".format(url))
+    except ConnectionError:
+        log.error("Error: Connection timed out getting file {}".format(url))
 
 
 def get_replacement_department_name(department):
@@ -114,17 +132,17 @@ def update_last_run(configuration, downloaded_data):
 
 def download_images(image_token, downloaded_data):
     if 'persons' in downloaded_data and len(downloaded_data['persons']) > 0:
-        log.info("Downloading images...")
-        image_count = 0
-        person_count = 0
-        for person in downloaded_data['persons']:
-            person_count += 1
-            if "badgeImageFileType" in person and person['badgeImageFileType'] != '':
-                image_count += 1
-                log.debug("Downloading image for: %s", person['namePrivacy'])
-                get_staff_image(image_token, person['id'], person['badgeImageFileType'])
+            log.info("Downloading images...")
+            image_count = 0
+            person_count = 0
+            for person in downloaded_data['persons']:
+                person_count += 1
+                if "badgeImageFileType" in person and person['badgeImageFileType'] != '':
+                    image_count += 1
+                    log.debug("Downloading image for: %s", person['namePrivacy'])
+                    get_staff_image(image_token, person['id'], person['badgeImageFileType'])
 
-        log.info("Downloaded %s images for %s people", image_count, person_count)
+            log.info("Downloaded %s images for %s people", image_count, person_count)
 
 
 def process_actions(input_data):
@@ -161,6 +179,7 @@ def process_persons(input_data):
                     'persons': [person],
                     'detailsVersion': input_data['detailsVersion']
                 }))
+
 
 def create_directory(dir_path):
     try:
