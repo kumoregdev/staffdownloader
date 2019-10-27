@@ -167,6 +167,8 @@ def process_persons(input_data):
                 person['notes'] = []
 
                 person['notes'].append("T-Shirt size: " + shirt)
+            if 'pronouns' in person:
+                person['pronouns'] = person['pronouns'].title()
             for i in range(len(person['positions'])):
                 dept = person['positions'][i]['department']
                 title = person['positions'][i]['title']
