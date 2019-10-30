@@ -11,3 +11,4 @@ else
 fi
 
 python get_staff.py
+python get_guests.py

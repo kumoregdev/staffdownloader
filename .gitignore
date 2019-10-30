@@ -105,7 +105,14 @@ ENV/
 
 # Config file. Never check in passwords!!
 config.py
+config_staff.py
+config_guest.py
 
 # Last run information and log files - generated each time the script runs
 lastrun.json
+lastrun-guest.json
+lastrun-staff.json
 
+# Downloaded data
+staff_data.json
+guest_data.json
