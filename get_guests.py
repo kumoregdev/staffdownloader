@@ -147,7 +147,7 @@ def process_persons(input_data):
             with open(path, 'w') as out_file:
                 out_file.write(json.dumps({
                     'persons': [person],
-                    'detailsVersion': input_data['detailsVersion']
+                    'detailsVersion': input_data['actionsVersion']
                 }))
 
 
