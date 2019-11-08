@@ -5,6 +5,7 @@ import os
 import shutil
 import json
 import datetime
+import time
 
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
@@ -141,6 +142,7 @@ def download_images(image_token, downloaded_data):
                     image_count += 1
                     log.debug("Downloading image for: %s", person['namePrivacy'])
                     get_staff_image(image_token, person['id'], person['badgeImageFileType'])
+                    time.sleep(1)
 
             log.info("Downloaded %s images for %s people", image_count, person_count)
 
